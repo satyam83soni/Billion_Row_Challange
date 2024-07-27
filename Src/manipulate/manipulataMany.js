@@ -1,9 +1,10 @@
 import fs from 'fs';
 import JSONStream from 'JSONStream';
-import { Transform } from 'node: stream';
+import { Transform } from 'stream';
 
 const manipulate = (keysToRemove, keysToCheck) => {
-    const readStream = fs.createReadStream("src.json", { encoding: 'utf8' });
+    console.time('start')
+    const readStream = fs.createReadStream("../write/dest.json", { encoding: 'utf8' });
     const writeStream = fs.createWriteStream("dest.json");
     
     writeStream.write('[');
@@ -47,7 +48,6 @@ const manipulate = (keysToRemove, keysToCheck) => {
         }
     });
 
-    // End the JSON array properly
     filterStream.on('end', () => {
         writeStream.write(']');
         writeStream.end();
@@ -58,6 +58,7 @@ const manipulate = (keysToRemove, keysToCheck) => {
         .pipe(JSONStream.parse('*'))
         .pipe(filterStream)
         .pipe(writeStream);
+        console.timeEnd('start')
 };
 
 export { manipulate };

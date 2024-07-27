@@ -6,7 +6,7 @@ const User = mongoose.model(
     name: String,
     username: String,
     email: String,
-    phone: Number
+    phone: String
   }
 );
 
