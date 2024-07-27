@@ -2,7 +2,7 @@ import fs from 'fs';
 import JSONStream from 'JSONStream';
 import { Transform } from 'stream';
 
-const manipulate = (keysToRemove, keysToCheck) => {
+const manipulate = (value, key) => {
     console.time('start')
     const readStream = fs.createReadStream("../write/dest.json", { encoding: 'utf8' });
     const writeStream = fs.createWriteStream("dest.json");
@@ -16,20 +16,20 @@ const manipulate = (keysToRemove, keysToCheck) => {
     const filterStream = new Transform({
         objectMode: true,
         transform(chunk, encoding, callback) {
-            const toCheck = chunk[keysToCheck];
+            const toCheck = chunk[key];
             let removed = false;
 
             if (typeof toCheck === 'string') {
                 const values = toCheck.split(' ');
 
-                removed = keysToRemove.some(toRemove => {
+                removed = value.some(toRemove => {
                     if (toRemove.includes(' ')) {
                         return toRemove === toCheck;
                     } else {
                         return values.includes(toRemove);
                     }
                 });
-            } else if (keysToRemove.includes(toCheck)) {
+            } else if (value.includes(toCheck)) {
                 removed = true;
             }
 

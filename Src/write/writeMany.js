@@ -54,7 +54,7 @@ import { faker } from '@faker-js/faker';
 const writeManys = async (numberOfWrites) => {
     console.time("start");
     
-    const stream = fs.createWriteStream("dest.json");
+    const stream = fs.createWriteStream("./dest.json");
     const chunkSize = 100000; 
     
     stream.write('[');

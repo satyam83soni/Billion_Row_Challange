@@ -13,7 +13,7 @@ const loadJsonToMongo = async () => {
     console.time("start")
     let buffer = [];
     let count = 0;
-    const filePath= "../write/dest.json"
+    const filePath= "./dest.json"
     try {
         const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
 
@@ -50,9 +50,54 @@ const loadJsonToMongo = async () => {
 
     } catch (err) {
         console.error('Error connecting to MongoDB:', err);
+    
     }
 };
 
+const loadJsonToMongos = async () => {
+    console.time("start")
+    let buffer = [];
+    let count = 0;
+    const filePath= "./dest.json"
+    try {
+        const readStream = fs.createReadStream(filePath, { encoding: 'utf8' });
+
+        const parser = JSONStream.parse('*');
+
+        const insertBatch = async () => {
+            if (buffer.length > 0) {
+                try {
+                    await User.insertMany(buffer);
+                    count += buffer.length;
+                    buffer = [];
+                } catch (err) {
+                    console.error('Error inserting batch:', err);
+                }
+            }
+        };
+
+        readStream.pipe(parser)
+            .on('data', (doc) => {
+                buffer.push(doc);
+                if (buffer.length >= BATCH_SIZE) {
+                    insertBatch();
+                }
+            })
+            .on('end', async () => {
+                await insertBatch(); 
+                console.log(`Finished inserting ${count} documents`);
+                return count;
+                console.timeEnd("start")
+            })
+            .on('error', (err) => {
+                console.error('Error processing the stream:', err);
+            });
+
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err);
+    
+    }
+};
 
 const streamUsers = async (req, res) => {
     try {
@@ -74,6 +119,7 @@ const streamUsers = async (req, res) => {
 
         cursor.on('end', () => {
             res.end(']');
+            console.log("Completed send")
         });
 
         cursor.on('error', (err) => {
@@ -108,4 +154,4 @@ const deleteUsers = async (req, res) => {
 
 
 
-export { streamUsers , loadJsonToMongo , deleteUsers  };
+export { streamUsers , loadJsonToMongos , deleteUsers  ,loadJsonToMongo };
